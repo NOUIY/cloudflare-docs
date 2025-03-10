@@ -37,7 +37,21 @@ async function autogenSections() {
 	});
 }
 
+async function autogenStyles() {
+	const styles = (
+		await readdir("./src/styles/", {
+			withFileTypes: true,
+			recursive: true,
+		})
+	)
+		.filter((x) => x.isFile())
+		.map((x) => x.parentPath + x.name);
+
+	return styles;
+}
+
 const sidebar = await autogenSections();
+const customCss = await autogenStyles();
 
 const runLinkCheck = process.env.RUN_LINK_CHECK || false;
 
@@ -89,26 +103,15 @@ export default defineConfig({
 			components: {
 				Footer: "./src/components/overrides/Footer.astro",
 				Head: "./src/components/overrides/Head.astro",
+				Header: "./src/components/overrides/Header.astro",
 				Hero: "./src/components/overrides/Hero.astro",
 				MarkdownContent: "./src/components/overrides/MarkdownContent.astro",
 				Sidebar: "./src/components/overrides/Sidebar.astro",
 				PageTitle: "./src/components/overrides/PageTitle.astro",
-				SocialIcons: "./src/components/overrides/SocialIcons.astro",
 				TableOfContents: "./src/components/overrides/TableOfContents.astro",
 			},
 			sidebar,
-			customCss: [
-				"./src/asides.css",
-				"./src/badges.css",
-				"./src/code.css",
-				"./src/footnotes.css",
-				"./src/headings.css",
-				"./src/input.css",
-				"./src/mermaid.css",
-				"./src/table.css",
-				"./src/tailwind.css",
-				"./src/title.css",
-			],
+			customCss,
 			pagination: false,
 			plugins: [
 				...(runLinkCheck
@@ -146,9 +149,7 @@ export default defineConfig({
 		tailwind({
 			applyBaseStyles: false,
 		}),
-		liveCode({
-			layout: "~/components/live-code/Layout.astro",
-		}),
+		liveCode({}),
 		icon(),
 		sitemap({
 			filter(page) {
